@@ -2,11 +2,13 @@ plugins {
 	id 'org.springframework.boot' version '2.2.6.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
+	id 'groovy'
 }
 
-group = 'com.lipsguswn'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '1.8'
+def javaProjects= [
+        project(':spring-data-dynamo'),
+		project(':surf-domain')
+]
 
 configurations {
 	developmentOnly
@@ -18,21 +20,44 @@ configurations {
 	}
 }
 
-repositories {
-	mavenCentral()
-}
-
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'com.h2database:h2'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+allprojects {
+	repositories {
+		mavenCentral()
+		jcenter()
+		maven { url "https://repo.spring.io/milestone" }
+		maven { url 'https://jitpack.io' }
+		maven { url 'https://s3-us-west-2.amazonaws.com/dynamodb-local/release' } // for DynamoDBLocal Lib
 	}
 }
 
-test {
-	useJUnitPlatform()
+configure(javaProjects) {
+
+	apply plugin: 'java'
+	apply plugin: 'org.springframework.boot'
+	apply plugin: 'io.spring.dependency-management'
+
+	group = "${projectGroup}"
+	version = "${projectVersion}"
+
+	sourceCompatibility = '1.8'
+
+	dependencies {
+
+		annotationProcessor 'org.projectlombok:lombok'
+		compileOnly 'org.projectlombok:lombok'
+
+		implementation 'org.springframework.boot:spring-boot-starter'
+
+		testAnnotationProcessor 'org.projectlombok:lombok'
+		testImplementation 'org.projectlombok:lombok'
+		testImplementation('org.springframework.boot:spring-boot-starter-test') {
+			exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+		}
+	}
+
+	test {
+		useJUnitPlatform()
+	}
 }
+
+
